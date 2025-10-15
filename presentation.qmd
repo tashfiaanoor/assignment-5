@@ -1,0 +1,114 @@
+---
+title: "Assignment 5 Quarto"
+author: "Tashfia Noor"
+format: revealjs
+transition: slide
+theme: night 
+---
+
+# Assignment 5 Quarto 
+
+This will look at stats on GDP and related indicators for primarily Bangladesh and the US, as well as relative to other countries.
+
+```{python}
+#| echo: false
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+wdi = pd.read_csv('wdi.csv')
+```
+
+## 
+These are comparative statistics on GDP for Bangladesh and the US.
+
+::: {.incremental}
+```{python}
+countries = ['United States', 'Bangladesh']
+subset = wdi[wdi['country'].isin(countries)]
+avg_by_country = subset.groupby('country')['gdp_growth_rate'].mean()
+print(avg_by_country)
+overall_avg = wdi[['gdp_growth_rate']].mean()
+print(overall_avg)
+```
+
+```{python}
+
+averages2 = (
+    wdi[wdi['country'].isin(countries)]
+    .groupby('country')[['education_expenditure_gdp_share', 'health_expenditure_gdp_share']]
+    .mean()
+)
+
+print(averages2)
+```
+
+```{python}
+
+averages3 = (
+    wdi[wdi['country'].isin(countries)]
+    .groupby('country')[['income_inequality', 'unemployment_rate']]
+    .mean()
+)
+
+print(averages3)
+```
+
+:::
+## GDP growth rate comparison between the US and Bangladesh
+
+```{python}
+
+#| echo: false
+
+import matplotlib.pyplot as plt
+avg_by_country.plot(kind='bar', title='GDP Growth Rate Comparison')
+plt.ylabel('Average GDP Growth Rate (%)')
+plt.show()
+```
+
+## Comparative Analysis
+Comparing GDP growth for known apparel exporting countries (Bangladesh, Cambodia, China)
+
+```{python}
+import matplotlib.pyplot as plt
+
+countries2 = ['Bangladesh', 'United States', 'Vietnam', 'Cambodia', 'China']
+
+avg = (
+    wdi[wdi['country'].isin(countries2)]
+    .groupby('country', as_index=False)['gdp_growth_rate']
+    .mean()
+    .sort_values('country')
+)
+
+x = np.arange(len(avg))
+y = avg['gdp_growth_rate'].values
+
+fig, ax = plt.subplots(figsize=(8,4.5))
+ax.scatter(x, y, s=120)
+
+ax.set_xticks(x)
+ax.set_xticklabels(avg['country'], rotation=20, ha='right')
+ax.set_ylabel('Average GDP growth rate (%)')
+ax.set_title('Average GDP Growth Rate for Apparel Exporting Countries')
+
+plt.tight_layout()
+plt.show()
+```
+
+## Table
+This table shows related indicators (education expenditure and health expenditure) for those apparel exporting countries.
+```{python}
+
+#| echo: false
+table = (
+    wdi[wdi["country"].isin(countries2)]
+    .groupby("country", as_index=False)
+    .agg(avg_gdp_growth=("gdp_growth_rate","mean"),
+         edu_spend_pct=("education_expenditure_gdp_share","mean"),
+         health_spend_pct=("health_expenditure_gdp_share","mean"))
+    .sort_values("country")
+)
+table
+```
